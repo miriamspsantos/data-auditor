@@ -86,15 +86,6 @@ class DataPreprocessor:
         log_msg = f"OHE Encoding: {ohe.columns}"
         self.log_details.append(log_msg)
         return self
-
-    @track_changes
-    def ohe_inverse_transform(self, ohe_encoder:ProfilerOneHotEncoder):
-        self.df = ohe_encoder.inverse_transform(self.df)
-        self.profiler.df = self.df
-        self.profiler._refresh()
-        log_msg = f"OHE Inverse Transform: {ohe_encoder.columns}"
-        self.log_details.append(log_msg)
-        return self
     
     @track_changes
     def ordinal_transform(self, profiler=None, columns:list[str]=None, categories=None, handle_unknown="use_nan"):
@@ -113,17 +104,18 @@ class DataPreprocessor:
         log_msg = f"Ordinal Encoding: {oe.columns}"
         self.log_details.append(log_msg)
         return self
-
+    
     @track_changes
-    def ordinal_inverse_transform(self, ordinal_encoder:ProfilerOrdinalEncoder):
-        # TODO: couple both inverse_transforms and add encoder as str
-        self.df = ordinal_encoder.inverse_transform(self.df)
+    def encoder_inverse_transform(self, encoder_key:str):
+        encoder = self.encoders[encoder_key]
+        self.df = encoder.inverse_transform(self.df)
         self.profiler.df = self.df
         self.profiler._refresh()
-        log_msg = f"Ordinal Inverse Transform: {ordinal_encoder.columns}"
+        encoder_type = encoder.get_encoder_type()
+        log_msg = f"{encoder_type} Inverse Transform: {encoder.columns}"
         self.log_details.append(log_msg)
         return self
-    
+        
     def get_encoders(self):
         return self.encoders
 

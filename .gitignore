@@ -1,2 +1,4 @@
 src/.DS_Store
 .DS_Store
+src/__pycache__
+src/encoders/__pycache__

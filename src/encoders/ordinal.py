@@ -31,6 +31,9 @@ class ProfilerOrdinalEncoder(BaseEstimator, TransformerMixin):
         self.mappings = {} # {col: {label: int}}
         self.inverse_mappings = {} # {col: {int: label}}
 
+    def get_encoder_type(self):
+        return "Ordinal Encoder"
+
     def fit(self, X, y=None):
         """Scan columns and build mappings."""
         X = pd.DataFrame(X)

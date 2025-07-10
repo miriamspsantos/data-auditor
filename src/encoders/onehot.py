@@ -32,6 +32,9 @@ class ProfilerOneHotEncoder(BaseEstimator, TransformerMixin):
         self.mappings = {} # {col: [cat1, cat2, cat3]}, e.g., {'Gender': ['F', 'M']}
         self.inverse_mappings = {}
 
+    def get_encoder_type(self):
+        return "OHE"
+    
     def fit(self, X, y=None):
         """Scan columns and build mappings."""
         X = pd.DataFrame(X)
