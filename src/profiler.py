@@ -8,12 +8,12 @@ class DataProfiler:
     def __init__(self, df: pd.DataFrame, target: str = None):
         self.df = df
         self.target = target
-        self.continuous = []
-        self.ordinal = []
-        self.nominal = []
-        self.binary = []
         self.analysis_summary = {}
         self.metadata_summary = {}
+        self._feature_overrides = {
+            "num_cols": set(),
+            "cat_cols": set()
+        }
         self._analyze()
     
     def get_data(self):
@@ -192,8 +192,20 @@ class DataProfiler:
     def _analyze(self):
         df = self.df
         self.n_samples, self.n_features = df.shape
-        self.num_cols = df.select_dtypes(include=["int64", "float64"]).columns.tolist()
-        self.cat_cols = df.select_dtypes(include=["object", "bool"]).columns.tolist()
+
+        # update num and cat cols (check if they were user-defined as well)
+        num_cols = set(df.select_dtypes(include=["int64", "float64"]).columns.tolist())
+        cat_cols = set(df.select_dtypes(include=["object", "bool"]).columns.tolist())
+
+        num_cols.update(self._feature_overrides["num_cols"])
+        cat_cols.update(self._feature_overrides["cat_cols"])
+
+        num_cols.difference_update(self._feature_overrides["cat_cols"])
+        cat_cols.difference_update(self._feature_overrides["num_cols"])
+
+        self.num_cols = sorted(list(num_cols))
+        self.cat_cols = sorted(list(cat_cols))
+
         self.cols = self.num_cols + self.cat_cols
         if self.target: self.cat_cols.remove(self.target)
         self.mv_cols = df.columns[df.isna().any()].to_list()
@@ -215,20 +227,20 @@ class DataProfiler:
             "mv_percentage": self.mv_percentage,
             "duplicate_rows": self.duplicate_rows,
             "target_distribution": self.target_distribution,
-            "continuous_cols": self.continuous,
-            "ordinal_cols": self.ordinal,
-            "nominal_cols": self.nominal,
-            "binary_cols": self.binary
         }
 
     def _refresh(self):
         self._analyze()
 
-    def _set_semantic_feature_types(self,
-                           cont_cols=None,
-                           ord_cols=None,
-                           nom_cols=None,
-                           bin_cols=None):
+    def reset_feature_type_overrides(self):
+        """Clean all overrides to num and cat columns."""
+        self._feature_overrides = {"num_cols": set(), "cat_cols": set()}
+        self._refresh()
+
+    def _set_semantic_feature_types(self, cont_cols=None, ord_cols=None, nom_cols=None, bin_cols=None):
+        """Sets semantic feature types to the profiler.
+            If a new setting occurs, it will override the previous.
+        """
         
         feature_roles = {
             "continuous": cont_cols,
@@ -241,7 +253,15 @@ class DataProfiler:
             if cols is not None:
                 setattr(self, role, cols)
                 self.metadata_summary[f"{role}_cols"] = cols
-        
+
+    def _override_feature_types(self, numeric=None, categorical=None):
+        if numeric:
+            self._feature_overrides["num_cols"].update(numeric)
+            self._feature_overrides["cat_cols"].difference(numeric)
+        if categorical:
+            self._feature_overrides["cat_cols"].update(categorical)
+            self._feature_overrides["num_cols"].difference_update(categorical)
+
     def _set_feature_mappings(self, map: dict, inverse_map: dict=None):
         if not hasattr(self, "feature_mappings"):
             self.feature_mappings = {}

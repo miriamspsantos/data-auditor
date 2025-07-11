@@ -55,15 +55,24 @@ class DataPreprocessor:
             ord_cols = ordinal_cols,
             nom_cols = nominal_cols,
             bin_cols = binary_cols)
-        self.profiler._refresh()
         log_msg = ""
         if continuous_cols: log_msg += f"Continuous: {continuous_cols}, "
-        if ordinal_cols: log_msg += f"Ordinal: {ordinal_cols}, "
-        if nominal_cols: log_msg += f"Nominal: {nominal_cols}, "
-        if binary_cols: log_msg += f"Binary: {binary_cols}"
+        if ordinal_cols: log_msg += f"Ordinal: {ordinal_cols} "
+        if nominal_cols: log_msg += f"Nominal: {nominal_cols} "
+        if binary_cols: log_msg += f"Binary: {binary_cols} "
         self.log_details.append(log_msg)
         return self
-
+    
+    @track_changes
+    def change_feature_types(self, num_cols:list[str]=None, cat_cols:list[str]=None):
+        self.profiler._override_feature_types(numeric=num_cols, categorical=cat_cols)
+        self.profiler._refresh()
+        log_msg = ""
+        if num_cols: log_msg += f"Num Cols: {num_cols}"
+        if cat_cols: log_msg += f"Cat Cols: {cat_cols}"
+        self.log_details.append(log_msg)
+        return self
+    
     def print_log_report(self):
         print("===== Track Changes =====")
         for i in range(len(self.change_logs)):
@@ -118,7 +127,4 @@ class DataPreprocessor:
         
     def get_encoders(self):
         return self.encoders
-
-    #TODO: set feature types (cat/num?)
-
 
