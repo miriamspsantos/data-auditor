@@ -40,8 +40,7 @@ class ProfilerOneHotEncoder(BaseEstimator, TransformerMixin):
         X = pd.DataFrame(X)
 
         cols_to_map = self.columns if self.columns else list(X.columns)
-        #TODO: maybe if profiler exists and has nominal and binary features, encode those instead of X.columns
-
+    
         for col in cols_to_map:
             categories = pd.Series(X[col].dropna().unique()).sort_values().tolist() # deterministic encoding
             self.mappings[col] = categories     # save to rebuild at transform time
@@ -62,8 +61,7 @@ class ProfilerOneHotEncoder(BaseEstimator, TransformerMixin):
         X = pd.DataFrame(X).copy()
         
         cols_to_map = self.columns if self.columns else list(X.columns)
-        #TODO: maybe if profiler exists and has nominal and binary features, encode those instead of X.columns
-
+    
         for col in cols_to_map:
             if col not in self.mappings:
                 raise KeyError(f"Error: No mapping found for column: {col}")

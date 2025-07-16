@@ -39,7 +39,6 @@ class ProfilerOrdinalEncoder(BaseEstimator, TransformerMixin):
         X = pd.DataFrame(X)
 
         cols_to_map = self.columns if self.columns else list(X.columns)
-        #TODO: maybe if profiler exists and has ordinal feature types, encode all of those instead of X.columns
 
         for i, col in enumerate(cols_to_map):
             if self.categories and i < len(self.categories):

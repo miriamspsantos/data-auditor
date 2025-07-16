@@ -4,6 +4,8 @@ from typing import Callable, Optional
 from encoders.ordinal import ProfilerOrdinalEncoder
 from encoders.onehot import ProfilerOneHotEncoder
 from pandas import DataFrame
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import MinMaxScaler
 
 # And functions to perform MinMax, Scaling, etc to each of them
 # Note sure how Pipelines work and whether we'd like to incorporate them here, probably we won't
@@ -23,6 +25,7 @@ class DataPreprocessor:
         #self.df = copy.deepcopy(profiler.df)
         self.df = profiler.df.copy()
         self.encoders = {}
+        self.column_transformers = {}
         self.change_logs = []
         self.log_details = []
     
@@ -124,6 +127,38 @@ class DataPreprocessor:
         log_msg = f"{encoder_type} Inverse Transform: {encoder.columns}"
         self.log_details.append(log_msg)
         return self
+    
+    @track_changes
+    def auto_col_transformer(self):
+        """Automatically build ColumnTransformer based on profiler metadata."""
+
+        transformer_constructor = {
+            "cont_cols": lambda: ("scale_continuous", MinMaxScaler(), getattr(self.profiler, "cont_cols", [])),
+            "ord_cols": lambda: ("encode_ordinal", ProfilerOrdinalEncoder(profiler=self.profiler), getattr(self.profiler, "ord_cols", [])),
+            "nom_cols": lambda: ("encode_nominal", ProfilerOneHotEncoder(profiler=self.profiler), getattr(self.profiler, "nom_cols", [])),
+            "bin_cols": lambda: ("encode_binary", ProfilerOneHotEncoder(profiler=self.profiler), getattr(self.profiler, "bin_cols", []))
+        }
+
+        transformers = []
+        log_transformers = ""
+
+        for constructor in transformer_constructor.values():
+            name, transformer, cols = constructor() # call lambda function to return tuple
+            if cols:
+                transformers.append((name, transformer, cols))
+                log_transformers += f"{name}"
+      
+        if not transformers:
+            raise Exception("Error: No transformer was created.")
+        
+
+        ct = ColumnTransformer(transformers=transformers, remainder="passthrough")
+        log_msg = "Automatic Column Transformer Created: " + log_transformers.rstrip("_")
+        self.log_details.append(log_msg)
+        key = f"ColumnTransformer_{log_transformers.rstrip("_")}"    
+        self.column_transformers[key] = ct
+        
+        return ct
         
     def get_encoders(self):
         return self.encoders

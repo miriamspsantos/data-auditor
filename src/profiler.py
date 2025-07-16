@@ -14,6 +14,10 @@ class DataProfiler:
             "num_cols": set(),
             "cat_cols": set()
         }
+        self.cont_cols = None
+        self.ord_cols = None
+        self.nom_cols = None
+        self.bin_cols = None
         self._analyze()
     
     def get_data(self):
