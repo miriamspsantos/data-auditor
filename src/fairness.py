@@ -11,17 +11,31 @@ class FairnessProfiler:
         self.profiler = DataProfiler(df=df, target=target)
         self.sensitive_groups = FairnessProfiler.intersectional_fairness_groups(sensitive_features)
      
-    def group_proportions_table(self):
+    def group_proportions_table(self) -> pd.DataFrame: 
         """Creates a table of group distribution.
         Sensitive features are shown individually and in combination.
         """
-        pass
+        
 
-    def target_rate_by_group_table(self):
-        """Creates a table of target distribution by sensitive features.
-        Sensitive features are shown individually and in combination.
+    def target_rate_by_group_table(self, group:str, target:str=None) -> pd.DataFrame:
+        """Creates a table of target distribution by group.
+        Group can be a combination of sensitive features, given by
+        self.sensitive_groups.
         """
-        pass
+        
+        target = self.target if target is None else target 
+            
+        if group in self.sensitive_groups.keys() and target:
+            pivot = pd.pivot_table(
+                self.df, 
+                index=target,
+                columns=self.sensitive_groups[group],
+                aggfunc="size",
+                fill_value=0
+            )
+
+            pivot_rate = round(pivot / pivot.values.sum() * 100, 2)
+            return pivot_rate
 
     def missing_data_disparity_imbalance(self):
         """Calculates the disparity (imbalance ratio) by feature
@@ -35,7 +49,7 @@ class FairnessProfiler:
         pass
 
     def get_sensitive_groups(self):
-        return self.sensitive_groups
+        return list(self.sensitive_groups.keys())
     
     def get_sensitive_features(self):
         return self.sensitive_features
@@ -48,4 +62,9 @@ class FairnessProfiler:
             c = list(combinations(sensitive_features, i))
             res.extend(c)
         group_lst = ["_".join(pairs) for pairs in res]
-        return group_lst
+
+        intersectional_groups = {}
+        for g in group_lst:
+            intersectional_groups[g] = g.split("_")
+        
+        return intersectional_groups
