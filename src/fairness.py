@@ -6,23 +6,39 @@ from itertools import combinations
 class FairnessProfiler:
     def __init__(self, df, sensitive_features:list[str], target:str=None):
         self.df = df
+        #TODO: maybe check if these features exist in df
         self.sensitive_features = sensitive_features
         self.target = target
         self.profiler = DataProfiler(df=df, target=target)
         self.sensitive_groups = FairnessProfiler.intersectional_fairness_groups(sensitive_features)
      
-    def group_proportions_table(self) -> pd.DataFrame: 
+    def group_proportions_table(self, group:str) -> pd.DataFrame: 
         """Creates a table of group distribution.
-        Sensitive features are shown individually and in combination.
+        Group can be a combination of sensitive features, given by
+        self.sensitive_groups.
         """
-        
+        if group in self.sensitive_groups.keys():
+            sensitive_features = self.sensitive_groups[group]
+            rows_index = sensitive_features[0] if len(sensitive_features) > 1 else None
+            cols = sensitive_features[1:] if rows_index else sensitive_features
+            
+        pivot = pd.pivot_table(
+            self.df,
+            index=rows_index,
+            columns=cols,
+            aggfunc="size",
+            fill_value=0
+        )
+
+        pivot_percent = round(pivot / pivot.values.sum() * 100, 2)
+        return pivot_percent
 
     def target_rate_by_group_table(self, group:str, target:str=None) -> pd.DataFrame:
         """Creates a table of target distribution by group.
         Group can be a combination of sensitive features, given by
         self.sensitive_groups.
         """
-        
+        #TODO: add protections for unknown group or target
         target = self.target if target is None else target 
             
         if group in self.sensitive_groups.keys() and target:
@@ -57,6 +73,10 @@ class FairnessProfiler:
 
     @staticmethod
     def intersectional_fairness_groups(sensitive_features:list[str]):
+        """Determines interseccional sensitive groups.
+        For each sensitive group, returns the features that
+        create it.
+        """
         res = []
         for i in range(1, len(sensitive_features) + 1):
             c = list(combinations(sensitive_features, i))
