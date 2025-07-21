@@ -82,7 +82,7 @@ class DataProfiler:
         plt.tight_layout()
         plt.show()
 
-    def plot_pivot_table(self, values: str, index: str, columns: str, aggfunc="mean"):
+    def plot_pivot_table(self, index: str, columns: str, aggfunc="mean", title:str=None, values:str=None, figsize:tuple=(6,4), plot_percent=False):
         """Plot heatmap based on pivot table.
 
         Parameters
@@ -96,16 +96,25 @@ class DataProfiler:
         aggfunc: {"mean", "max", "min"}
             Function to calculate aggregates.
         """
+        fill_value = 0 if aggfunc == "size" else None
+
         pivot_df = self.df.pivot_table(
             values=values,
             index=index,
             columns=columns,
-            aggfunc = aggfunc
+            aggfunc = aggfunc,
+            fill_value=fill_value
         )
-        plt.figure(figsize=(6,4))
-        ax = sns.heatmap(pivot_df, annot=True, fmt=".1f", linewidth=.5)
-        ax.set(xlabel=index, ylabel=columns)
+
+        if aggfunc == "size" and plot_percent:
+            pivot_df = round(pivot_df / pivot_df.values.sum() * 100, 2)
+
+        plt.figure(figsize=figsize)
+        ax = sns.heatmap(pivot_df, annot=True, fmt=".1f", linewidth=.5, cbar_kws={"label": f"{f"{aggfunc}_{values}" if values else aggfunc}"})
+        ax.set(xlabel=columns, ylabel=index)
         ax.xaxis.tick_top()
+        ax.xaxis.set_label_position('top') 
+        plt.title(title if title else f"{values if values else aggfunc} by {index} and {columns}")
         plt.show()
 
     def plot_mult_histogram(self, col_names: list, hue=None, cols=2, figsize=(12, 4)):
