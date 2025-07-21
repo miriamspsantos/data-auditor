@@ -12,7 +12,7 @@ class FairnessProfiler:
         self.profiler = DataProfiler(df=df, target=target)
         self.sensitive_groups = FairnessProfiler.intersectional_fairness_groups(sensitive_features)
      
-    def group_proportions_table(self, group:str) -> pd.DataFrame: 
+    def group_proportions_table(self, group:str, plot_tab=False) -> pd.DataFrame: 
         """Creates a table of group distribution.
         Group can be a combination of sensitive features, given by
         self.sensitive_groups.
@@ -31,9 +31,19 @@ class FairnessProfiler:
         )
 
         pivot_percent = round(pivot / pivot.values.sum() * 100, 2)
+
+        if plot_tab:
+                self.profiler.plot_pivot_table(
+                    index=rows_index,
+                    columns=cols,
+                    aggfunc="size", 
+                    title="Proportions by Group",
+                    plot_percent=True, 
+                    figsize=(pivot_percent.shape[1] * 2, pivot_percent.shape[0] * 2))
+
         return pivot_percent
 
-    def target_rate_by_group_table(self, group:str, target:str=None) -> pd.DataFrame:
+    def target_rate_by_group_table(self, group:str, target:str=None, plot_tab=False) -> pd.DataFrame:
         """Creates a table of target distribution by group.
         Group can be a combination of sensitive features, given by
         self.sensitive_groups.
@@ -51,6 +61,16 @@ class FairnessProfiler:
             )
 
             pivot_rate = round(pivot / pivot.values.sum() * 100, 2)
+
+            if plot_tab:
+                self.profiler.plot_pivot_table(
+                    index=target,
+                    columns=self.sensitive_groups[group],
+                    aggfunc="size", 
+                    title="Proportions by Group",
+                    plot_percent=True, 
+                    figsize=(pivot_rate.shape[1] * 2, pivot_rate.shape[0] * 2))
+
             return pivot_rate
 
     def missing_data_disparity_imbalance(self):
@@ -60,8 +80,13 @@ class FairnessProfiler:
         """
         pass
     
-    def plot_feature_by_group(self):
-        """Plots a feature by group."""
+    def plot_table(self):
+        """Represents pivot_tables in a visual format."""
+        # TODO: Call from profiler with specific settings, adjust figsize dynamically
+        # TODO: embed as a flag in main method or keep separate?
+        pass
+
+    def plot_sensitive_groups(self):
         pass
 
     def get_sensitive_groups(self):
