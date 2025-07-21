@@ -7,4 +7,6 @@ def load_data(path: str) -> pd.DataFrame:
         .str.lower()
         .str.replace(" ", "_")
         )
+    for col in df.select_dtypes(include=["object", "string"]).columns:
+        df[col] = df[col].str.strip().str.lower()
     return df
