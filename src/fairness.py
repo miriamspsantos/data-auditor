@@ -1,16 +1,21 @@
 import pandas as pd
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
 from profiler import DataProfiler
 from itertools import combinations
-
 
 class FairnessProfiler:
     def __init__(self, df, sensitive_features:list[str], target:str=None):
         self.df = df
-        #TODO: maybe check if these features exist in df
+        #TODO: maybe check if these features exist in df and if they are categorical
         self.sensitive_features = sensitive_features
         self.target = target
         self.profiler = DataProfiler(df=df, target=target)
         self.sensitive_groups = FairnessProfiler.intersectional_fairness_groups(sensitive_features)
+        self.fairness_df = FairnessProfiler.create_fairness_df(df=self.df, 
+                                                                      sensitive_groups=self.sensitive_groups)
+        # TODO: update df in original data rather than making a copy?
      
     def group_proportions_table(self, group:str, plot_tab=False) -> pd.DataFrame: 
         """Creates a table of group distribution.
@@ -79,14 +84,10 @@ class FairnessProfiler:
         Returns a dictionary for all groups and all features.
         """
         pass
-    
-    def plot_table(self):
-        """Represents pivot_tables in a visual format."""
-        # TODO: Call from profiler with specific settings, adjust figsize dynamically
-        # TODO: embed as a flag in main method or keep separate?
-        pass
 
-    def plot_sensitive_groups(self):
+    def plot_sensitive_groups(self, group:str, target=None):
+        # 1. get dataframe with specified groups
+        # 2. use seaborn countplot to plot the proportions
         pass
 
     def get_sensitive_groups(self):
@@ -97,7 +98,7 @@ class FairnessProfiler:
 
 
     @staticmethod
-    def intersectional_fairness_groups(sensitive_features:list[str]):
+    def intersectional_fairness_groups(sensitive_features:list[str]) -> dict:
         """Determines interseccional sensitive groups.
         For each sensitive group, returns the features that
         create it.
@@ -113,3 +114,16 @@ class FairnessProfiler:
             intersectional_groups[g] = g.split("_")
         
         return intersectional_groups
+    
+    @staticmethod
+    def create_fairness_df(df: pd.DataFrame, sensitive_groups: dict):
+        """Creates a copy of the original dataframe and adds columns
+        corresponding to the combination of sensitive features.
+        """
+        fairness_df = df.copy()
+        for group, features in sensitive_groups.items():
+            if len(features) > 1:
+                fairness_df[group] = fairness_df[features].agg(lambda x: "_".join(x.dropna().astype(str)) 
+                                             if x.notna().all() else np.nan, axis=1)
+        return fairness_df
+
