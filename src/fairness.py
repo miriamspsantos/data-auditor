@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from profiler import DataProfiler
 from itertools import combinations
+from typing import Union
 
 class FairnessEngine:
     def __init__(self, df, sensitive_features:list[str], target:str=None):
@@ -85,10 +86,26 @@ class FairnessEngine:
         """
         pass
 
-    def plot_sensitive_groups(self, group:str, target=None):
-        # 1. get dataframe with specified groups
-        # 2. use seaborn countplot to plot the proportions
-        pass
+    def plot_sensitive_groups(self, groups:Union[str, list], target=None, subplot_size=(9, 4)):
+        """Plots the distribution of sensitive groups. If target is given, 
+        the distribution will be color-coded. Parameter groups can be a str,
+        a list, or "all" (in this case it plots all sensitive groups).
+        """
+
+        all_groups = self.get_sensitive_groups()
+
+        if groups == "all": groups = all_groups
+        elif isinstance(groups, str): groups=list(groups)
+        elif not (isinstance(groups, list) and all(g in all_groups for g in groups)): 
+             raise ValueError("Error: Unknown group passed as argument.")
+        
+        print(groups)
+        self.fairness_profiler.plot_mult_histogram(
+                col_names=groups,
+                hue=target,
+                cols=1,
+                subplot_size=subplot_size,
+        )
 
     def get_sensitive_groups(self):
         return list(self.sensitive_groups.keys())
