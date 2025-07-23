@@ -5,17 +5,17 @@ import matplotlib.pyplot as plt
 from profiler import DataProfiler
 from itertools import combinations
 
-class FairnessProfiler:
+class FairnessEngine:
     def __init__(self, df, sensitive_features:list[str], target:str=None):
         self.df = df
         #TODO: maybe check if these features exist in df and if they are categorical
         self.sensitive_features = sensitive_features
         self.target = target
         self.profiler = DataProfiler(df=df, target=target)
-        self.sensitive_groups = FairnessProfiler.intersectional_fairness_groups(sensitive_features)
-        self.fairness_df = FairnessProfiler.create_fairness_df(df=self.df, 
+        self.sensitive_groups = FairnessEngine.intersectional_fairness_groups(sensitive_features)
+        self.fairness_df = FairnessEngine.create_fairness_df(df=self.df, 
                                                                       sensitive_groups=self.sensitive_groups)
-        # TODO: update df in original data rather than making a copy?
+        self.fairness_profiler = DataProfiler(df=self.fairness_df, target=target)
      
     def group_proportions_table(self, group:str, plot_tab=False) -> pd.DataFrame: 
         """Creates a table of group distribution.
