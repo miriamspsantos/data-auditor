@@ -32,7 +32,7 @@ class DataProfiler:
         for k,v in self.summary.items():
             print(f"{k}: {v}")
 
-    def plot_histogram(self, x: str, hue=None, kde=None, multiple="layer", shrink=1, title=None):
+    def plot_histogram(self, x: str, hue=None, kde=None, multiple="layer", shrink=1, title=None, figsize=(6, 4)):
         """Plot basic histogram.
         
         Parameters
@@ -47,7 +47,7 @@ class DataProfiler:
             Approach to resolve multiple elements when semantic mapping creates subsets.
         """
         if multiple == "dodge": shrink = 0.8
-        plt.figure(figsize=(6,4))
+        plt.figure(figsize=figsize)
         sns.histplot(data=self.df, x=x, hue=hue, kde=kde, multiple=multiple, shrink=shrink)
         if not title:
             title = f"Histogram of {x}"
@@ -117,7 +117,7 @@ class DataProfiler:
         plt.title(title if title else f"{values if values else aggfunc} by {index} and {columns}")
         plt.show()
 
-    def plot_mult_histogram(self, col_names: list, hue=None, cols=2, figsize=(12, 4)):
+    def plot_mult_histogram(self, col_names: list, hue=None, cols=2, subplot_size=(6, 4)):
         """Plot multiple histograms in a grid layout.
 
         Parameters
@@ -134,7 +134,9 @@ class DataProfiler:
         n = len(col_names)
         rows = math.ceil(n/cols)
 
-        _ , axes = plt.subplots(rows, cols, figsize=(figsize[0], figsize[1]*rows))
+        fig_width, fig_height = subplot_size[0] * cols, subplot_size[1] * rows 
+        
+        _ , axes = plt.subplots(rows, cols, figsize=(fig_width, fig_height))
         axes = axes.flatten()
 
         for i, col in enumerate(col_names):
