@@ -1,5 +1,6 @@
 import pandas as pd
 import seaborn as sns
+import numpy as np
 import matplotlib.pyplot as plt
 import math
 
@@ -137,6 +138,7 @@ class DataProfiler:
         fig_width, fig_height = subplot_size[0] * cols, subplot_size[1] * rows 
         
         _ , axes = plt.subplots(rows, cols, figsize=(fig_width, fig_height))
+        axes = np.atleast_1d(axes)
         axes = axes.flatten()
 
         for i, col in enumerate(col_names):
