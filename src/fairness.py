@@ -106,6 +106,22 @@ class FairnessEngine:
                 subplot_size=subplot_size,
         )
 
+    def plot_features_by_group(self, col_names:list, groups:Union[str, list], subplot_size=(9, 4)):
+        
+        all_groups = self.get_sensitive_groups()
+
+        if groups == "all": groups = all_groups
+        elif isinstance(groups, str): groups=[groups]
+        elif not (isinstance(groups, list) and all(g in all_groups for g in groups)): 
+             raise ValueError("Error: Unknown group passed as argument.")
+        
+        if isinstance(col_names, str): col_names=[col_names]
+
+        for group in groups:
+            print(col_names)
+            print(group)
+            self.fairness_profiler.plot_mult_histogram(col_names=col_names, hue=group)
+
     def get_sensitive_groups(self):
         return list(self.sensitive_groups.keys())
     
