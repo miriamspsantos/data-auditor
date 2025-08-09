@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
-from profiler import DataProfiler
+from ..profiler import DataProfiler
 
 
 class ProfilerOrdinalEncoder(BaseEstimator, TransformerMixin):

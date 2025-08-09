@@ -2,7 +2,7 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
-from profiler import DataProfiler
+from .profiler import DataProfiler
 from itertools import combinations
 from typing import Union
 from sklearn.metrics import confusion_matrix, classification_report

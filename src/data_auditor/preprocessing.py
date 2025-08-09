@@ -1,9 +1,7 @@
-from profiler import DataProfiler
-import copy
+from .profiler import DataProfiler
 from typing import Callable, Optional
-from encoders.ordinal import ProfilerOrdinalEncoder
-from encoders.onehot import ProfilerOneHotEncoder
-from pandas import DataFrame
+from .encoders.ordinal import ProfilerOrdinalEncoder
+from .encoders.onehot import ProfilerOneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import MinMaxScaler
 

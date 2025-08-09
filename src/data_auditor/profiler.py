@@ -111,7 +111,13 @@ class DataProfiler:
             pivot_df = round(pivot_df / pivot_df.values.sum() * 100, 2)
 
         plt.figure(figsize=figsize)
-        ax = sns.heatmap(pivot_df, annot=True, fmt=".1f", linewidth=.5, cbar_kws={"label": f"{f"{aggfunc}_{values}" if values else aggfunc}"})
+
+        label = f"{aggfunc}_{values}" if values else f"{aggfunc}"
+        ax = sns.heatmap(pivot_df,
+                         annot=True,
+                         fmt=".1f",
+                         linewidth=.5,
+                         cbar_kws={"label": label})
         ax.set(xlabel=columns, ylabel=index)
         ax.xaxis.tick_top()
         ax.xaxis.set_label_position('top') 
@@ -212,7 +218,7 @@ class DataProfiler:
 
         # update num and cat cols (check if they were user-defined as well)
         num_cols = set(df.select_dtypes(include=["int64", "float64"]).columns.tolist())
-        cat_cols = set(df.select_dtypes(include=["object", "bool"]).columns.tolist())
+        cat_cols = set(df.select_dtypes(include=["object", "string", "category", "bool"]).columns.tolist())
 
         num_cols.update(self._feature_overrides["num_cols"])
         cat_cols.update(self._feature_overrides["cat_cols"])
