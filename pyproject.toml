@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "data-auditor"
-version = "0.1.3"
+version = "0.1.5"
 description = "A modular profiling and preprocessing library for tabular ML datasets"
 authors = [
     { name="miriamspsantos", email="miriam.santos@fc.up.pt" }
 ]
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = "<=3.13"
+requires-python = ">=3.9"
 dependencies = [
     "pandas",
     "scikit-learn",

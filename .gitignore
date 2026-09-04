@@ -1,4 +1,6 @@
-src/.DS_Store
 .DS_Store
-src/__pycache__
-src/encoders/__pycache__
+__pycache__/
+*.py[cod]
+dist/
+build/
+*.egg-info/

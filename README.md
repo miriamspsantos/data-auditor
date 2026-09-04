@@ -1,1 +1,1 @@
-data-auditor: 0.1.0
+data-auditor: 0.1.5
